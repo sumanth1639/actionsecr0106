@@ -2,7 +2,8 @@ name: Build and Push to ECR
 
 on:
   push:
-    branches: [main]
+    branches: [main]  # Change this to your default branch if needed
+  workflow_dispatch:  # Allows manual runs from the GitHub UI
 
 jobs:
   build-and-push:
@@ -23,16 +24,18 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set up Docker image tag
+      - name: Set up Docker image tags
         run: |
           echo "REPO_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}" >> $GITHUB_ENV
           echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          echo "VERSION_TAG=v1.0.0" >> $GITHUB_ENV  # Change this if you want dynamic versioning
 
       - name: Build Docker image
         run: |
-          docker build -t $REPO_URI:$IMAGE_TAG -f my-node-app/Dockerfile my-node-app/
+          docker build -t $REPO_URI:$IMAGE_TAG -t $REPO_URI:$VERSION_TAG -f my-node-app/Dockerfile my-node-app/
 
       - name: Push Docker image to ECR
         run: |
           docker push $REPO_URI:$IMAGE_TAG
+          docker push $REPO_URI:$VERSION_TAG
 
