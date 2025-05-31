@@ -1,0 +1,31 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches: [main]  # or your default branch
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker image tag
+        id: vars
+        run: |
+          echo "REPO_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        run: |
+          docker build -t $REPO_URI:$IMAGE_TAG .
+
+      - name: Push Docker image to ECR
+        run: |
+          docker push $REPO_URI:$IMAGE_TAG
