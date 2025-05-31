@@ -30,7 +30,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $REPO_URI:$IMAGE_TAG .
+          docker build -t $REPO_URI:$IMAGE_TAG -f my-node-app/Dockerfile my-node-app/
 
       - name: Push Docker image to ECR
         run: |
